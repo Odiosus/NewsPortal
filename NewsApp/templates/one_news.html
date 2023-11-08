@@ -1,0 +1,36 @@
+<!-- ✅создали новый шаблон, в котором мы будем выводить новости по-отдельности-->
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+<!--загружаем теги и фильтры-->
+{% load custom_filters %}
+{% load custom_tags %}
+
+<!-- Название — News -->
+{% block title %}
+News
+{% endblock title %}
+
+<!-- В контенте на странице выводим новость, id которой передан в url -->
+{% block content %}
+<!-- Пошла красота! Всякого форматирования добавили! -->
+<!--Добавили отступ-->
+<p>&nbsp;</p>
+<!--заголовок статьи, цензурируется-->
+<h1>{{ one_news.heading|b_dictionary }}</h1>
+<!--всякая полоса-->
+<hr>
+<!--текст статьи, цензурируется-->
+<blockquote><p style="text-align: justify;">{{ one_news.text|b_dictionary }}</p></blockquote>
+<!--всякая полоса-->
+<hr>
+<!--дата новости-->
+<p style="text-align: left;"><span style="color: #333333;"><em>{{ n.pub_date|date:'d M Y' }}</em></span></p>
+<!--Раздел автора новости сделан в виде активной ссылки на страницу источника. Открывается в новом окне После статьи справа-->
+<blockquote>
+<p style="text-align: right;"><a title="{{ one_news.author }} " href="{{ one_news.author }}" target="_blank" rel="noopener">Источник</a></p>
+</blockquote>
+{{ one_news.author }}
+<!--Раздел категории после автора-источника. Размещен слева-->
+<p style="text-align: left;"><span style="color: #003366;">В категории: {{ one_news.category }}</span></p>
+{% endblock content %}

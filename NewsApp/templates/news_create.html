@@ -1,0 +1,16 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+
+<h1>Новая публикация</h1>
+<hr>
+<form action="{% url 'news_create' %}" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+
+  <button type="submit">Опубликовать новость</button>
+</form>
+
+
+{% endblock content %}
