@@ -1,20 +1,26 @@
-# Create your views here.
-# ✅импорт модуль datetime — получаем текущую дату
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.contrib.auth.models import Group
 from django.urls import reverse_lazy
-# ✅импорт дженериков ListView, DetailView, CreateView, DeleteView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .forms import NewsForm
-# импорт модели News
 from .models import News
-# ✅добавляем фильтр из filters.py
 from .filters import NewsFilter
-from django.shortcuts import redirect
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+
+
+@login_required
+def upgrade_me(request):
+    user = request.user
+    authors = Group.objects.get(name='authors')
+    if not request.user.groups.filter(name='authors').exists():
+        authors.user_set.add(user)
+    return redirect('/')
 
 
 # Тут смотрим новости – news
-class NewsList(ListView):
+class NewsList(ListView, LoginRequiredMixin):
     # Указываем модель, объекты которой мы будем выводить
     model = News
     # сортируем через наоборот
@@ -86,19 +92,20 @@ class SearchView(ListView):
 
 
 # обновляем (редактируем) новость
-class NewsUpdate(UpdateView):
+class NewsUpdate(PermissionRequiredMixin, UpdateView):
     model = News
-    fields = ['author', 'heading', 'text']
-    template_name = 'news_edit.html'
-    # после обновления возвращаемся на главную страницу
-    success_url = reverse_lazy('news_list')
+    form_class = NewsForm
+    login_url = '/accounts/login/'
+    template_name = 'post_edit.html'
+    permission_required = ('NewsPaper.change_news',)
 
 
 # создаем новость
-class NewsCreate(CreateView):
+class NewsCreate(PermissionRequiredMixin, CreateView):
     model = News
     fields = ['author', 'heading', 'text', 'pub_date', 'category']
     template_name = 'news_create.html'
+    permission_required = ('NewsPaper.add_news',)
     # после создания возвращаемся на главную страницу
     success_url = reverse_lazy('news_list')
 
@@ -118,10 +125,11 @@ class NewsDelete(DeleteView):
 
 
 # создаем статью
-class ArticleCreate(CreateView):
+class ArticleCreate(PermissionRequiredMixin, CreateView):
     model = News
     fields = ['author', 'heading', 'text', 'pub_date', 'category']
     template_name = 'article_create.html'
+    permission_required = ('NewsPaper.add_news',)
     success_url = reverse_lazy('news_list')
 
     # переопределяем метод form_valid и устанавливаем поле статьи по умолчанию
@@ -133,11 +141,13 @@ class ArticleCreate(CreateView):
 
 
 # обновляем (редактируем) статью. После обновления на главную
-class ArticleUpdate(UpdateView):
+class ArticleUpdate(PermissionRequiredMixin, UpdateView):
     model = News
     fields = ['author', 'heading', 'text']
+    login_url = '/accounts/login/'
     template_name = 'article_edit.html'
-    success_url = reverse_lazy('news_list')
+    permission_required = ('NewsPaper.change_news',)
+    # success_url = reverse_lazy('news_list')
 
 
 # удаляем статью
@@ -145,3 +155,4 @@ class ArticleDelete(DeleteView):
     model = News
     template_name = 'news/article_delete.html'
     success_url = reverse_lazy('news_list')
+

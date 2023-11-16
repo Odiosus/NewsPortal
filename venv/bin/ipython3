@@ -1,4 +1,4 @@
-#!/Users/smy/PycharmProjects/SF_D6.6_NewsPortal_Suchkov/venv/bin/python3
+#!/Users/smy/PycharmProjects/SF_D8_NewsPortal_Suchkov/venv/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys
