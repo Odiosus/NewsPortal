@@ -1,7 +1,8 @@
 # ✅создали файл самостоятельно и импортировали пути
 from django.urls import path
 # ✅импорт представлений
-from .views import NewsList, NewsDetail, SearchView, NewsCreate, NewsUpdate, NewsDelete, ArticleCreate, ArticleUpdate
+from .views import NewsList, NewsDetail, SearchView, NewsCreate, NewsUpdate, NewsDelete, ArticleCreate, ArticleUpdate, \
+    upgrade_me, CategoryListView, subscribe
 from .views import ArticleDelete
 from django.contrib.auth.decorators import login_required
 
@@ -21,4 +22,8 @@ urlpatterns = [
     path('article/create/', ArticleCreate.as_view(), name='article_create'),
     path('article/<int:pk>/edit/', login_required(ArticleUpdate.as_view()), name='article_update'),
     path('article/<int:pk>/delete/', ArticleDelete.as_view(), name='article_delete'),
+    path('upgrade/', upgrade_me, name='upgrade'),
+    path('category/<int:pk>', CategoryListView.as_view(), name='category_list'),
+    path('category/<int:pk>/subscribers', subscribe, name='subscribe'),
+
 ]

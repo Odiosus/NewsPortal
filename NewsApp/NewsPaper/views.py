@@ -1,11 +1,12 @@
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.models import Group
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .forms import NewsForm
-from .models import News
+from .models import CategorySubscribe, News, Category
+from django.contrib.auth.models import User
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 
@@ -16,7 +17,7 @@ def upgrade_me(request):
     authors = Group.objects.get(name='authors')
     if not request.user.groups.filter(name='authors').exists():
         authors.user_set.add(user)
-    return redirect('/')
+    return redirect('/news')
 
 
 # Тут смотрим новости – news
@@ -155,4 +156,41 @@ class ArticleDelete(DeleteView):
     model = News
     template_name = 'news/article_delete.html'
     success_url = reverse_lazy('news_list')
+
+
+# Список категорий:
+class CategoryListView(NewsList):
+    model = News
+    template_name = 'news/category_list.html'
+    context_object_name = 'category_news_list'
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['pk'])
+        queryset = News.objects.filter(category=self.category)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_not_subscriber'] = self.request.user not in self.category.subscribers.all()
+        context['category'] = self.category
+        return context
+
+
+# Функция позволяющая подписаться на категорию
+def subscribe_to_category(request, pk):
+    current_user = request.user
+    CategorySubscribe.objects.create(category=Category.objects.get(pk=pk), subscriber=User.objects.get(pk=current_user.id))
+
+    return render(request, 'subscribe.html')
+
+
+@login_required
+def subscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.add(user)
+
+    message = 'Вы подписались на рассылку категории'
+    return render(request, 'news/subscribe.html', {'category': category, 'message': message})
+
 

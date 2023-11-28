@@ -1,5 +1,7 @@
 # https://django.fun/docs/django/4.2/intro/tutorial02/#creating-models
 import datetime
+
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -21,7 +23,8 @@ class News(models.Model):
     # ⚠️поле автор новости
     author = models.CharField(max_length=255)
     # https://django.fun/docs/django/4.2/intro/tutorial02/#playing-with-the-api
-    pub_date = models.DateTimeField("date published: 0000-00-00 00:00:00")
+    #"date published: 0000-00-00 00:00:00"
+    pub_date = models.DateTimeField(auto_now_add=True)
     # type = models.ForeignKey(to='Type', on_delete=models.CASCADE, related_name='news')
     type = models.CharField(max_length=2, choices=SELECT)
 
@@ -40,6 +43,14 @@ class News(models.Model):
 class Category(models.Model):
     # названия категорий уникальное
     name = models.CharField(max_length=30, unique=True)
+    subscribers = models.ManyToManyField(User, blank=True,  null=True, related_name='categories')
 
     def __str__(self):
-        return self.name.title()
+        return self.name
+
+
+class CategorySubscribe(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE)
+
+

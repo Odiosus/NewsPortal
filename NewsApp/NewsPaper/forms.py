@@ -14,6 +14,6 @@ class NewsForm(forms.ModelForm):
             'text',
             'author',
             'category',
-            'pub_date',
+            #'pub_date',
             'type'
         ]

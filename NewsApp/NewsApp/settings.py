@@ -1,6 +1,12 @@
 # ✅импортируем самостоятельно, если еще не
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+
+# загружаем ENV
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+ctkb@w0k+$ktfo&svee^&d!d@!rm2qd374w2+vek^=co+@2&z'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -28,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # ✅добавили новое приложение
-    'NewsPaper',
+    'NewsPaper.apps.NewspaperConfig',
     # ⚠️подключаем еще приложения
     'django.contrib.sites',
     'django.contrib.flatpages',
@@ -40,6 +46,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'django_apscheduler',
 ]
 
 # ⚠️добавили самостоятельно
@@ -151,8 +158,46 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 # Чтобы allauth распознал нашу форму как ту, что должна выполняться вместо формы по умолчанию,
 # необходимо добавить строчку
 ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}
+
+
+# адрес сервера Яндекс-почты для всех один и тот же
+EMAIL_HOST = 'smtp.yandex.ru'  
+# порт smtp сервера тоже одинаковый
+EMAIL_PORT = 465  
+# ваше имя пользователя, например, если ваша почта user@yandex.ru, то сюда надо писать user, 
+# иными словами, это всё то что идёт до собаки
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# пароль от почты
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') 
+# Яндекс использует ssl, подробнее о том, что это, почитайте в дополнительных источниках, 
+# но включать его здесь обязательно
+EMAIL_USE_SSL = True  
+
+
+ADMINS = [
+    ('Maks', 'suchkow@ya.ru'),  # список всех админов в формате ('имя', 'их почта')
+]
+
+MANAGERS = [
+    ('man1', 'man@nodog.com')
+]
+
+SERVER_EMAIL = os.getenv('SERVER_EMAIL')  # это будет у нас вместо аргумента FROM в массовой рассылке
+
+#os.getenv('DEFAULT_FROM_EMAIL')
+# здесь указываем уже свою ПОЛНУЮ почту, с которой будут отправляться письма
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+SITE_URL = 'http://127.0.0.1:8000'
+
+# формат даты, которую будет воспринимать наш задачник (вспоминаем модуль по фильтрам)
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+# если задача не выполняется за 25 секунд, то она автоматически снимается,
+# можете поставить время побольше, но как правило, это сильно бьёт по производительности сервера
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
