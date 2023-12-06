@@ -25,5 +25,4 @@ urlpatterns = [
     path('upgrade/', upgrade_me, name='upgrade'),
     path('category/<int:pk>', CategoryListView.as_view(), name='category_list'),
     path('category/<int:pk>/subscribers', subscribe, name='subscribe'),
-
 ]

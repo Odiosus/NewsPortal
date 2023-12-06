@@ -8,8 +8,6 @@ from django.core.mail import EmailMultiAlternatives
 from .models import Category
 
 
-
-
 def send_notifications(preview, pk, title, subscribers):
     html_content = render_to_string(
         'post_created_email.html',

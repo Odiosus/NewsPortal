@@ -192,5 +192,3 @@ def subscribe(request, pk):
 
     message = 'Вы подписались на рассылку категории'
     return render(request, 'news/subscribe.html', {'category': category, 'message': message})
-
-
