@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.core.cache import cache
 
 
 # Create your models here.
@@ -23,9 +24,7 @@ class News(models.Model):
     # ⚠️поле автор новости
     author = models.CharField(max_length=255)
     # https://django.fun/docs/django/4.2/intro/tutorial02/#playing-with-the-api
-    #"date published: 0000-00-00 00:00:00"
     pub_date = models.DateTimeField(auto_now_add=True)
-    # type = models.ForeignKey(to='Type', on_delete=models.CASCADE, related_name='news')
     type = models.CharField(max_length=2, choices=SELECT)
 
     def __str__(self):
@@ -36,7 +35,13 @@ class News(models.Model):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
 
     def get_absolute_url(self):
-        return reverse('product_detail', args=[str(self.id)])
+        return reverse('one_news', args=[str(self.id)])
+
+    def save(self, *args, **kwargs):
+        # вызываем метод родителя, чтобы объект сохранился
+        super().save(*args, **kwargs)
+        # удаляем его из кэша, чтобы сбросить
+        cache.delete(f'news-{self.pk}')
 
 
 # Модель Категория, к которой будет привязываться новость

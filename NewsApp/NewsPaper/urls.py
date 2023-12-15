@@ -5,6 +5,7 @@ from .views import NewsList, NewsDetail, SearchView, NewsCreate, NewsUpdate, New
     upgrade_me, CategoryListView, subscribe
 from .views import ArticleDelete
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 
 
 urlpatterns = [
@@ -13,6 +14,9 @@ urlpatterns = [
     # объявленное представление является классом — представляем этот класс в виде view
     # вызываем метод as_view.
     path('', NewsList.as_view(), name='news_list'),
+    # добавим кэширование на конкретную новость.
+    # Раз в 10 минут новость будет записываться в кэш для экономии ресурсов
+    # cache_page(60 * 10) — убрали, чтобы было чистенько
     path('<int:pk>', NewsDetail.as_view(), name='one_news'),
     # регистрируем новое представление SearchView
     path('search/', SearchView.as_view(), name='search'),

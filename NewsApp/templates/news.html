@@ -23,6 +23,9 @@ News
     {% if news %}
     <br>
     <hr>
+<!--⚠️ добавили кэширование-->
+    {% load cache %}
+    {% cache 60 posts%}
         <table>
             <tr>
                 <td><h4>Размещена</h4></td>
@@ -42,6 +45,7 @@ News
                 <td><p>{{ n.category.name }}<br /><br /></p></td>
             </tr>
             {% endfor %}
+    {% endcache %}
         </table>
     <hr>
     {% else %}

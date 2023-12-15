@@ -9,6 +9,7 @@ from .models import CategorySubscribe, News, Category
 from django.contrib.auth.models import User
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.core.cache import cache
 
 
 @login_required
@@ -58,6 +59,18 @@ class NewsDetail(DetailView):
     template_name = 'one_news.html'
     # название объекта, в котором будет выбранная статья
     context_object_name = 'one_news'
+    queryset = News.objects.all()
+
+    # ⚠️ переопределяем метод получения объекта (кэшируем пока не изменили)
+    def get_object(self, *args, **kwargs):
+        # метод get забирает значение по ключу, если его нет, то забирает None
+        obj = cache.get(f'news-{self.kwargs["pk"]}', None)
+        # если объекта нет в кэше, то получаем его и записываем в кэш
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'news-{self.kwargs["pk"]}', obj)
+
+        return obj
 
 
 class SearchView(ListView):
